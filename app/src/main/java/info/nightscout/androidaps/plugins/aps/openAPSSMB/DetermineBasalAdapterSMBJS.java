@@ -297,6 +297,9 @@ public class DetermineBasalAdapterSMBJS {
         mProfile.put("current_basal", basalrate);
         mProfile.put("temptargetSet", tempTargetSet);
         mProfile.put("autosens_max", SafeParse.stringToDouble(sp.getString(R.string.key_openapsama_autosens_max, "1.2")));
+        // gz mod7c: can I add autosens_min here?
+        mProfile.put("autosens_min", SafeParse.stringToDouble(sp.getString(R.string.key_openapsama_autosens_min, "0.8")));
+
 
         if (profileFunction.getUnits().equals(Constants.MMOL)) {
             mProfile.put("out_units", "mmol/L");
@@ -331,7 +334,9 @@ public class DetermineBasalAdapterSMBJS {
         mGlucoseStatus.put("short_avgdelta", glucoseStatus.short_avgdelta);
         mGlucoseStatus.put("long_avgdelta", glucoseStatus.long_avgdelta);
         mGlucoseStatus.put("date", glucoseStatus.date);
-
+        // GZ mod 7: append 2 variables for 5% range
+        mGlucoseStatus.put("dura05", glucoseStatus.dura05);
+        mGlucoseStatus.put("avg05", glucoseStatus.avg05);
         mMealData = new JSONObject();
         mMealData.put("carbs", mealData.carbs);
         mMealData.put("boluses", mealData.boluses);
