@@ -110,6 +110,36 @@ function enable_smb(
     return false;
 }
 
+function autoISF(sens, target_bg, profile, glucose_status, meal_data, autosens_data, sensitivityRatio)
+{   // #### gz mod 7: dynamic ISF based on duration and width of 5% BG band
+    // #### gz mod 7b: misuse autosens_min to get the scale factor
+    var dura05 = glucose_status.dura05;
+    var avg05  = glucose_status.avg05;
+    var weightISF = (1 - profile.autosens_min)*2              // mod gz7b: use 0.6 to get factor 0.8; use 1 to get factor 0, i.e. OFF
+    if (meal_data.mealCOB==0 && dura05>=10) {
+        if (avg05 > target_bg) {
+            // # fight the resistance at high levels
+            var maxISFReduction = profile.autosens_max;
+            var dura05_weight = dura05 / 60;
+            var avg05_weight = weightISF / target_bg;      // mod gz7b: provide access from AAPS
+            var prodISF = 1 + dura05_weight*avg05_weight*Math.pow(avg05-target_bg,1);
+            var liftISF = Math.min(maxISFReduction, Math.max(prodISF, sensitivityRatio));
+            console.error("gz ISF", sens, "did not do it for", dura05,"m; go more aggressive by", round(liftISF,2));
+            if (maxISFReduction < prodISF) {
+                console.error("gz ISF reduction", round(prodISF,2), "limited by autosens_max", maxISFReduction);
+            }
+            sens = round(profile.sens / liftISF, 1);
+        } else {
+            console.error("gz keep ISF; avg. glucose", avg05, "below target", target_bg);
+        }
+    } else if (meal_data.mealCOB>0) {
+        console.error("gz keep ISF due to mealCOB of "+round(meal_data.mealCOB,1));
+    } else {
+        console.error("gz keep ISF as BG level is only "+dura05+"m at level "+avg05);
+    }
+    return sens;
+}
+
 var determine_basal = function determine_basal(glucose_status, currenttemp, iob_data, profile, autosens_data, meal_data, tempBasalFunctions, microBolusAllowed, reservoir_data, currentTime) {
     var rT = {}; //short for requestedTemp
 
@@ -288,6 +318,7 @@ var determine_basal = function determine_basal(glucose_status, currenttemp, iob_
         //console.log(" (autosens ratio "+sensitivityRatio+")");
     }
     console.error("; CR:",profile.carb_ratio);
+    sens = autoISF(sens, target_bg, profile, glucose_status, meal_data, autosens_data, sensitivityRatio);
 
     // compare currenttemp to iob_data.lastTemp and cancel temp if they don't match
     var lastTempAge;
