@@ -892,7 +892,7 @@ var determine_basal = function determine_basal(glucose_status, currenttemp, iob_
         enableSMB = false;
     }
     if (eventualBG > 165 && iob_data.iob < 8) { var scaleSMB = (target_bg/(UAMpredBG-target_bg));
-        var microBolus = Math.floor(Math.min(insulinReq/scaleSMB,maxBolus)*roundSMBTo)/roundSMBTo; 
+        var microBolus = Math.floor(Math.min(insulinReq/scaleSMB,maxBolus)*roundSMBTo)/roundSMBTo;
         console.error("SMB scaled by "+scaleSMB+" ;"); } else { var microBolus = Math.floor(Math.min(insulinReq/2,maxBolus)*roundSMBTo)/roundSMBTo;
      }
 
