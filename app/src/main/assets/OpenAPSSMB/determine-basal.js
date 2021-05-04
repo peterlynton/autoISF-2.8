@@ -886,11 +886,15 @@ var determine_basal = function determine_basal(glucose_status, currenttemp, iob_
         //rT.reason += "minGuardBG "+minGuardBG+"<"+threshold+": SMB disabled; ";
         enableSMB = false;
     }
-    if ( maxDelta > 0.20 * bg ) {
+    if ( maxDelta > 0.30 * bg ) {
         console.error("maxDelta",convert_bg(maxDelta, profile),"> 20% of BG",convert_bg(bg, profile),"- disabling SMB");
         rT.reason += "maxDelta "+convert_bg(maxDelta, profile)+" > 20% of BG "+convert_bg(bg, profile)+": SMB disabled; ";
         enableSMB = false;
     }
+    if (eventualBG > 165 && iob_data.iob < 8) { var scaleSMB = (target_bg/(UAMpredBG-target_bg));
+        var microBolus = Math.floor(Math.min(insulinReq/scaleSMB,maxBolus)*roundSMBTo)/roundSMBTo; 
+        console.error("SMB scaled by "+scaleSMB+" ;"); } else { var microBolus = Math.floor(Math.min(insulinReq/2,maxBolus)*roundSMBTo)/roundSMBTo;
+     }
 
     console.error("BG projected to remain above",convert_bg(min_bg, profile),"for",minutesAboveMinBG,"minutes");
     if ( minutesAboveThreshold < 240 || minutesAboveMinBG < 60 ) {
